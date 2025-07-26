@@ -1,0 +1,8 @@
+mycie twarzy,1,26,1,
+mycie się,1,26,1,
+anki,1,26,1,
+pilates,1,26,1,
+anime,1,26,1,
+oglądanie po japońsku,1,26,1,
+programowanie,1,26,1,
+szukanie pracy,1,26,1,
