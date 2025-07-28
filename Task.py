@@ -1,12 +1,13 @@
 from tkinter import *
 
 class Task:
-    def __init__(self, name, state, date, streak):
+    def __init__(self, name, state, date, streak, frequency):
         self.name = name
         self.state = BooleanVar()
         self.state.set(state)
         self.date = date
         self.streak = int(streak)
+        self.frequency = frequency
 
     def show(self):
         print(self.name + ' ' + str(self.state.get()))
@@ -34,3 +35,6 @@ class Task:
 
     def get_streak(self):
         return self.streak
+
+    def get_frequency(self):
+        return self.frequency

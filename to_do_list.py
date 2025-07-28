@@ -8,7 +8,7 @@ def load(_list):
     with open('dane/zadania.txt', encoding='utf-8') as file:
         for text_line in file.readlines():
             parts = text_line.split(',')
-            _list.append(Task(parts[0], parts[1], parts[2], parts[3]))
+            _list.append(Task(parts[0], parts[1], datetime.strptime(parts[2], "%Y-%m-%d").date(), parts[3], parts[4]))
     checkboxes = []
     for widget in container.winfo_children():
         widget.destroy()
@@ -20,7 +20,7 @@ def load(_list):
 def add():
     save_state(tasks)
     user_input = get_input()
-    today = datetime.today()
+    today = datetime.today().date()
     write = True
     if user_input is None:
         write = False
@@ -36,7 +36,7 @@ def add():
 
     with open('dane/zadania.txt', 'a', encoding='utf-8') as file:
         if write:
-            file.write(f"{user_input},0,{today.day},0,\n")
+            file.write(f"{user_input},0,{today.isoformat()},0,0,\n")
         else:
             print(f"failed")
     load(tasks)
@@ -54,14 +54,14 @@ def delete():
     load(tasks)
 
 def save_state(_list):
-    today = datetime.today()
+    today = datetime.today().date()
     with open('dane/zadania.txt', 'w', encoding='utf-8') as file:
         for item in _list:
-            file.write(f"{item.get_name()}{f",1,{today.day},{item.get_streak()},\n" if item.get_state_get() else f",0,{today.day},{item.get_streak()},\n"}")
+            file.write(f"{item.get_name()},{f"1" if item.get_state_get() else f"0"},{today.isoformat()},{item.get_streak()},{item.get_frequency()},\n")
 
 def open_new_day(_list):
-    today = datetime.today()
-    if int(_list[0].get_day()) != today.day:
+    today = datetime.today().date()
+    if _list[0].get_day() != today:
         for item in _list:
             if item.get_state_get():
                 item.add_streak()
