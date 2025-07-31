@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import datetime, timedelta
 from tkinter import *
 from tkinter import simpledialog
 from Task import Task
@@ -10,10 +10,12 @@ def load(_list):
             parts = text_line.split(',')
             _list.append(Task(parts[0], parts[1], datetime.strptime(parts[2], "%Y-%m-%d").date(), parts[3], parts[4]))
     checkboxes = []
+    today = datetime.today().date()
     for widget in container.winfo_children():
         widget.destroy()
     for task in _list:
-        checkboxes.append(Checkbutton(container, text=task.get_name(), variable=task.get_state()))
+        if task.get_day() + timedelta(days=int(task.get_frequency())) <= today or task.get_day() == today:
+            checkboxes.append(Checkbutton(container, text=task.get_name(), variable=task.get_state()))
     for i in range(len(checkboxes)):
         checkboxes[i].pack(anchor='w')
 
@@ -57,12 +59,18 @@ def save_state(_list):
     today = datetime.today().date()
     with open('dane/zadania.txt', 'w', encoding='utf-8') as file:
         for item in _list:
-            file.write(f"{item.get_name()},{f"1" if item.get_state_get() else f"0"},{today.isoformat()},{item.get_streak()},{item.get_frequency()},\n")
+            if item.get_day() + timedelta(days=int(item.get_frequency())) <= today and not item.get_state_get() :
+                date = item.get_day()
+            elif item.get_day() + timedelta(days=int(item.get_frequency())) <= today:
+                date = today
+            else:
+                date = item.get_day()
+            file.write(f"{item.get_name()},{f"1" if item.get_state_get() else f"0"},{date.isoformat()},{item.get_streak()},{item.get_frequency()},\n")
 
 def open_new_day(_list):
     today = datetime.today().date()
-    if _list[0].get_day() != today:
-        for item in _list:
+    for item in _list:
+        if item.get_day() + timedelta(days= int(item.get_frequency())) <= today:
             if item.get_state_get():
                 item.add_streak()
             else:
