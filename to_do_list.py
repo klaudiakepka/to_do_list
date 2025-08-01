@@ -9,6 +9,7 @@ def load(_list):
         for text_line in file.readlines():
             parts = text_line.split(',')
             _list.append(Task(parts[0], parts[1], datetime.strptime(parts[2], "%Y-%m-%d").date(), parts[3], parts[4]))
+
     checkboxes = []
     today = datetime.today().date()
     for widget in container.winfo_children():
@@ -20,28 +21,52 @@ def load(_list):
         checkboxes[i].pack(anchor='w')
 
 def add():
-    save_state(tasks)
-    user_input = get_input()
-    today = datetime.today().date()
-    write = True
-    if user_input is None:
-        write = False
-    elif len(user_input) <= 0:
-        write = False
-    elif "\\n" in user_input:
-        write = False
-    else:
-        for item in tasks:
-            if item.get_name() == user_input:
-                write = False
-                print(f"already exists")
+    name_input = StringVar()
+    frequency_input = IntVar()
+    error = StringVar()
 
-    with open('dane/zadania.txt', 'a', encoding='utf-8') as file:
-        if write:
-            file.write(f"{user_input},0,{today.isoformat()},0,0,\n")
+    def submit():
+        name = name_input.get()
+        frequency = frequency_input.get()
+        today = datetime.today().date()
+        save_state(tasks)
+        write = True
+        if frequency <= 0:
+            write = False
+            error.set("frequency must be more than 0")
+        elif name is None:
+            write = False
+            error.set("name cannot be empty")
+        elif len(name) <= 0:
+            write = False
+            error.set("name cannot be empty")
+        elif "\\n" in name:
+            write = False
+            error.set("name cannot contain escape character")
         else:
-            print(f"failed")
-    load(tasks)
+            for item in tasks:
+                if item.get_name() == name:
+                    write = False
+                    error.set("task already eqist")
+
+        with open('dane/zadania.txt', 'a', encoding='utf-8') as file:
+            if write:
+                file.write(f"{name},0,{today.isoformat()},0,0,\n")
+        load(tasks)
+
+    add_window = Toplevel(root)
+    name_label = Label(add_window, text="name:")
+    frequency_label = Label(add_window, text="frequency:")
+    name_entry = Entry(add_window, textvariable= name_input)
+    frequency_entry = Entry(add_window, textvariable= frequency_input)
+    submit_button = Button(add_window, text="Submit", command=submit)
+    error_message = Label(add_window, textvariable=error)
+    name_label.grid(row=0, column=0, sticky=W)
+    frequency_label.grid(row=1, column=0, sticky=W)
+    name_entry.grid(row=0, column=1, sticky=W)
+    frequency_entry.grid(row=1, column=1, sticky=W)
+    submit_button.grid(row=2, column=0, columnspan=2)
+    error_message.grid(row=3, column=0, columnspan=2)
 
 def delete():
     name = get_input()
