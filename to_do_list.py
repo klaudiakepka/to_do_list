@@ -1,6 +1,5 @@
 from datetime import datetime, timedelta
 from tkinter import *
-from tkinter import simpledialog
 from Task import Task
 
 def load(_list):
@@ -51,7 +50,7 @@ def add():
 
         with open('dane/zadania.txt', 'a', encoding='utf-8') as file:
             if write:
-                file.write(f"{name},0,{today.isoformat()},0,0,\n")
+                file.write(f"{name},0,{today.isoformat()},0,{frequency},\n")
         load(tasks)
 
     add_window = Toplevel(root)
@@ -69,16 +68,34 @@ def add():
     error_message.grid(row=3, column=0, columnspan=2)
 
 def delete():
-    name = get_input()
-    change = False
-    for item in tasks:
-        if name == item.get_name():
-            tasks.remove(item)
-            change = True
-            print("removed")
-    if change:
-        save_state(tasks)
-    load(tasks)
+    text = StringVar()
+
+    def create():
+        name_list.delete(0, END)
+        for i in range(len(tasks)):
+            name_list.insert(i, tasks[i].get_name())
+
+    def submit():
+        name = name_list.get(name_list.curselection())
+        change = False
+        for item in tasks:
+            if name == item.get_name():
+                tasks.remove(item)
+                change = True
+                text.set("Task removed")
+        if change:
+            save_state(tasks)
+            create()
+        load(tasks)
+
+    delete_window = Toplevel(root)
+    name_list = Listbox(delete_window)
+    delete_button = Button(delete_window, text="delete", command=submit)
+    message = Label(delete_window, textvariable=text)
+    create()
+    name_list.grid(column=0, row=0)
+    delete_button.grid(column=1, row=0)
+    message.grid(columnspan=2, row=2)
 
 def save_state(_list):
     today = datetime.today().date()
@@ -102,9 +119,6 @@ def open_new_day(_list):
                 item.break_streak()
             item.change_state()
 
-def get_input():
-    user_input = simpledialog.askstring("Wprowadź dane", "Wpisz tekst:")
-    return user_input
 
 root = Tk()
 container = Frame(root)
