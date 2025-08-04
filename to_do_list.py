@@ -112,8 +112,6 @@ def save_state(_list):
 def open_new_day(_list):
     today = datetime.today().date()
     with open('dane/current_date.txt', 'r+') as file:
-        print(datetime.strptime(file.read(), "%Y-%m-%d").date() != today)
-        file.seek(0)
         if datetime.strptime(file.read(), "%Y-%m-%d").date() != today:
             file.seek(0)
             file.write(today.isoformat())
