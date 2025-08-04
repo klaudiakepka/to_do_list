@@ -111,13 +111,18 @@ def save_state(_list):
 
 def open_new_day(_list):
     today = datetime.today().date()
-    for item in _list:
-        if item.get_day() + timedelta(days= int(item.get_frequency())) <= today:
-            if item.get_state_get():
-                item.add_streak()
-            else:
-                item.break_streak()
-            item.change_state()
+    with open('dane/current_date.txt', 'r+') as file:
+        print(datetime.strptime(file.read(), "%Y-%m-%d").date() != today)
+        file.seek(0)
+        if datetime.strptime(file.read(), "%Y-%m-%d").date() != today:
+            file.seek(0)
+            file.write(today.isoformat())
+            for item in _list:
+                if item.get_state_get():
+                    item.add_streak()
+                    item.change_state()
+                else:
+                    item.break_streak()
 
 
 root = Tk()
