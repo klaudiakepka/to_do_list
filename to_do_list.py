@@ -116,11 +116,12 @@ def open_new_day(_list):
             file.seek(0)
             file.write(today.isoformat())
             for item in _list:
-                if item.get_state_get():
-                    item.add_streak()
-                    item.change_state()
-                else:
-                    item.break_streak()
+                if item.get_day() + timedelta(days=int(item.get_frequency())) <= today or item.get_day() == today:
+                    if item.get_state_get():
+                        item.add_streak()
+                        item.change_state()
+                    else:
+                        item.break_streak()
 
 
 root = Tk()
