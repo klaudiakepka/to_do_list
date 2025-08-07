@@ -112,9 +112,10 @@ def save_state(_list):
 def open_new_day(_list):
     today = datetime.today().date()
     with open('dane/current_date.txt', 'r+') as file:
-        if datetime.strptime(file.read(), "%Y-%m-%d").date() != today:
+        while datetime.strptime(file.read(), "%Y-%m-%d").date() != today:
             file.seek(0)
-            file.write(today.isoformat())
+            date = datetime.strptime(file.read(), "%Y-%m-%d").date() + timedelta(days=1)
+            file.write(date.isoformat())
             for item in _list:
                 if item.get_day() + timedelta(days=int(item.get_frequency())) <= today or item.get_day() == today:
                     if item.get_state_get():
