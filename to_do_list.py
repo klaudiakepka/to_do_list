@@ -1,9 +1,12 @@
+import os.path
 from datetime import datetime, timedelta
 from tkinter import *
 from Task import Task
 
 def load(_list):
     _list.clear()
+    if not os.path.exists('dane/zadania.txt'):
+        open('dane/zadania.txt', 'a').close()
     with open('dane/zadania.txt', encoding='utf-8') as file:
         for text_line in file.readlines():
             parts = text_line.split(',')
@@ -46,8 +49,10 @@ def add():
             for item in tasks:
                 if item.get_name() == name:
                     write = False
-                    error.set("task already eqist")
+                    error.set("task already exist")
 
+        if not os.path.exists('dane/zadania.txt'):
+            open('dane/zadania.txt', 'a').close()
         with open('dane/zadania.txt', 'a', encoding='utf-8') as file:
             if write:
                 file.write(f"{name},0,{today.isoformat()},0,{frequency},\n")
@@ -99,6 +104,8 @@ def delete():
 
 def save_state(_list):
     today = datetime.today().date()
+    if not os.path.exists('dane/zadania.txt'):
+        open('dane/zadania.txt', 'a').close()
     with open('dane/zadania.txt', 'w', encoding='utf-8') as file:
         for item in _list:
             if item.get_day() + timedelta(days=int(item.get_frequency())) <= today and not item.get_state_get() :
@@ -111,6 +118,9 @@ def save_state(_list):
 
 def open_new_day(_list):
     today = datetime.today().date()
+    if not os.path.exists('dane/current_date.txt'):
+        with open('dane/current_date.txt', 'a+') as file:
+            file.write(today.isoformat())
     with open('dane/current_date.txt', 'r+') as file:
         date = datetime.strptime(file.read(), "%Y-%m-%d").date()
         while date != today:
