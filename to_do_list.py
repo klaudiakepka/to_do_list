@@ -23,20 +23,27 @@ def load(_list):
         checkboxes[i].pack(anchor='w')
 
 def add():
-    name_input = StringVar()
-    frequency_input = IntVar()
     error = StringVar()
 
     def submit():
-        name = name_input.get()
-        frequency = frequency_input.get()
-        today = datetime.today().date()
+        name = name_entry.get()
         save_state(tasks)
         write = True
-        if frequency <= 0:
+        try:
+            date = datetime.strptime(date_entry.get(), "%Y.%m.%d").date()
+        except ValueError:
+            error.set("wrong date. Use format Y.M.D")
             write = False
-            error.set("frequency must be more than 0")
-        elif name is None:
+
+        try:
+            frequency = int(frequency_entry.get())
+            if frequency <= 0:
+                write = False
+                error.set("frequency must be more than 0")
+        except (TypeError, ValueError):
+            write = False
+            error.set("frequency must be a number")
+        if name is None:
             write = False
             error.set("name cannot be empty")
         elif len(name) <= 0:
@@ -55,22 +62,27 @@ def add():
             open('dane/zadania.txt', 'a').close()
         with open('dane/zadania.txt', 'a', encoding='utf-8') as file:
             if write:
-                file.write(f"{name},0,{today.isoformat()},0,{frequency},\n")
+                file.write(f"{name},0,{date.isoformat()},0,{frequency},\n")
         load(tasks)
 
     add_window = Toplevel(root)
     name_label = Label(add_window, text="name:")
     frequency_label = Label(add_window, text="frequency:")
-    name_entry = Entry(add_window, textvariable= name_input)
-    frequency_entry = Entry(add_window, textvariable= frequency_input)
+    date_label = Label(add_window, text='starting date:')
+    name_entry = Entry(add_window)
+    frequency_entry = Entry(add_window)
+    date_entry = Entry(add_window)
     submit_button = Button(add_window, text="Submit", command=submit)
     error_message = Label(add_window, textvariable=error)
+
     name_label.grid(row=0, column=0, sticky=W)
     frequency_label.grid(row=1, column=0, sticky=W)
-    name_entry.grid(row=0, column=1, sticky=W)
-    frequency_entry.grid(row=1, column=1, sticky=W)
-    submit_button.grid(row=2, column=0, columnspan=2)
-    error_message.grid(row=3, column=0, columnspan=2)
+    date_label.grid(row=2, column=0, sticky=W)
+    name_entry.grid(row=0, column=1)
+    frequency_entry.grid(row=1, column=1)
+    date_entry.grid(row=2, column=1)
+    submit_button.grid(row=0, column=2, rowspan=3)
+    error_message.grid(row=3, column=0, columnspan=3)
 
 def delete():
     text = StringVar()
