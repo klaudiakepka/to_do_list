@@ -1,23 +1,23 @@
 import os.path
 from datetime import datetime, timedelta
 from tkinter import *
-from Task import Task
+from Task_frequency import Task_frequency
+
 
 def load(_list):
     _list.clear()
-    if not os.path.exists('dane/zadania.txt'):
-        open('dane/zadania.txt', 'a').close()
-    with open('dane/zadania.txt', encoding='utf-8') as file:
+    if not os.path.exists('dane/tasks.txt'):
+        open('dane/tasks.txt', 'a').close()
+    with open('dane/tasks.txt', encoding='utf-8') as file:
         for text_line in file.readlines():
             parts = text_line.split(',')
-            _list.append(Task(parts[0], parts[1], datetime.strptime(parts[2], "%Y-%m-%d").date(), parts[3], parts[4]))
+            _list.append(Task_frequency(parts[0], parts[1], datetime.strptime(parts[2], "%Y-%m-%d").date(), parts[3], parts[4]))
 
     checkboxes = []
-    today = datetime.today().date()
     for widget in container.winfo_children():
         widget.destroy()
     for task in _list:
-        if task.get_day() + timedelta(days=int(task.get_frequency())) <= today or task.get_day() == today:
+        if task.show():
             checkboxes.append(Checkbutton(container, text=task.get_name(), variable=task.get_state()))
     for i in range(len(checkboxes)):
         checkboxes[i].pack(anchor='w')
@@ -26,6 +26,8 @@ def add():
     error = StringVar()
 
     def submit():
+        date = ""
+        frequency = 0
         name = name_entry.get()
         save_state(tasks)
         write = True
@@ -58,9 +60,9 @@ def add():
                     write = False
                     error.set("task already exist")
 
-        if not os.path.exists('dane/zadania.txt'):
-            open('dane/zadania.txt', 'a').close()
-        with open('dane/zadania.txt', 'a', encoding='utf-8') as file:
+        if not os.path.exists('dane/tasks.txt'):
+            open('dane/tasks.txt', 'a').close()
+        with open('dane/tasks.txt', 'a', encoding='utf-8') as file:
             if write:
                 file.write(f"{name},0,{date.isoformat()},0,{frequency},\n")
         load(tasks)
@@ -116,16 +118,16 @@ def delete():
 
 def save_state(_list):
     today = datetime.today().date()
-    if not os.path.exists('dane/zadania.txt'):
-        open('dane/zadania.txt', 'a').close()
-    with open('dane/zadania.txt', 'w', encoding='utf-8') as file:
+    if not os.path.exists('dane/tasks.txt'):
+        open('dane/tasks.txt', 'a').close()
+    with open('dane/tasks.txt', 'w', encoding='utf-8') as file:
         for item in _list:
-            if item.get_day() + timedelta(days=int(item.get_frequency())) <= today and not item.get_state_get() :
-                date = item.get_day()
-            elif item.get_day() + timedelta(days=int(item.get_frequency())) <= today:
+            if item.show() and not item.get_state_get() :
+                date = item.get_date()
+            elif item.show():
                 date = today
             else:
-                date = item.get_day()
+                date = item.get_date()
             file.write(f"{item.get_name()},{f"1" if item.get_state_get() else f"0"},{date.isoformat()},{item.get_streak()},{item.get_frequency()},\n")
 
 def open_new_day(_list):
@@ -138,7 +140,7 @@ def open_new_day(_list):
         while date != today:
             date += timedelta(days=1)
             for item in _list:
-                if item.get_day() + timedelta(days=int(item.get_frequency())) <= today or item.get_day() == today:
+                if item.show():
                     if item.get_state_get():
                         item.add_streak()
                         item.change_state()

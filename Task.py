@@ -1,16 +1,15 @@
+from datetime import datetime
 from tkinter import *
 
 class Task:
-    def __init__(self, name, state, date, streak, frequency):
+    def __init__(self, name, state, streak):
         self.name = name
         self.state = BooleanVar()
         self.state.set(state)
-        self.date = date
         self.streak = int(streak)
-        self.frequency = frequency
 
     def show(self):
-        print(self.name + ' ' + str(self.state.get()))
+        return True
 
     def change_state(self):
         self.state.set(not self.state)
@@ -30,11 +29,5 @@ class Task:
     def get_state_get(self):
         return self.state.get()
 
-    def get_day(self):
-        return self.date
-
     def get_streak(self):
         return self.streak
-
-    def get_frequency(self):
-        return self.frequency
