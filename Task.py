@@ -2,7 +2,8 @@ from datetime import datetime
 from tkinter import *
 
 class Task:
-    def __init__(self, name, state, streak):
+    def __init__(self,type, name, state, streak):
+        self.type = type
         self.name = name
         self.state = BooleanVar()
         self.state.set(state)
@@ -10,6 +11,9 @@ class Task:
 
     def show(self):
         return True
+
+    def write(self):
+        return f"{self.type},{self.name},{self.state.get()},{self.streak}"
 
     def change_state(self):
         self.state.set(not self.state)
@@ -29,5 +33,5 @@ class Task:
     def get_state_get(self):
         return self.state.get()
 
-    def get_streak(self):
-        return self.streak
+    def get_type(self):
+        return self.type

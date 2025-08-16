@@ -1,6 +1,7 @@
 import os.path
 from datetime import datetime, timedelta
 from tkinter import *
+from Task import Task
 from Task_frequency import Task_frequency
 
 
@@ -11,7 +12,10 @@ def load(_list):
     with open('dane/tasks.txt', encoding='utf-8') as file:
         for text_line in file.readlines():
             parts = text_line.split(',')
-            _list.append(Task_frequency(parts[0], parts[1], datetime.strptime(parts[2], "%Y-%m-%d").date(), parts[3], parts[4]))
+            if parts[0] == '0':
+                _list.append(Task(parts[0], parts[1], parts[2], parts[3]))
+            elif parts[0] == '1':
+                _list.append(Task_frequency(parts[0], parts[1], parts[2], parts[3], datetime.strptime(parts[4], "%Y-%m-%d").date(), parts[5]))
 
     checkboxes = []
     for widget in container.winfo_children():
@@ -64,7 +68,8 @@ def add():
             open('dane/tasks.txt', 'a').close()
         with open('dane/tasks.txt', 'a', encoding='utf-8') as file:
             if write:
-                file.write(f"{name},0,{date.isoformat()},0,{frequency},\n")
+                task = Task_frequency(1,name,False,0,date,frequency)
+                file.write(task.write())
         load(tasks)
 
     add_window = Toplevel(root)
@@ -122,13 +127,16 @@ def save_state(_list):
         open('dane/tasks.txt', 'a').close()
     with open('dane/tasks.txt', 'w', encoding='utf-8') as file:
         for item in _list:
-            if item.show() and not item.get_state_get() :
-                date = item.get_date()
-            elif item.show():
-                date = today
+            if item.get_type() == '1':
+                if item.show() and not item.get_state_get() :
+                    date = item.get_date()
+                elif item.show():
+                    date = today
+                else:
+                    date = item.get_date()
+                file.write(item.write(date))
             else:
-                date = item.get_date()
-            file.write(f"{item.get_name()},{f"1" if item.get_state_get() else f"0"},{date.isoformat()},{item.get_streak()},{item.get_frequency()},\n")
+                file.write(f"{item.write()}\n")
 
 def open_new_day(_list):
     today = datetime.today().date()
