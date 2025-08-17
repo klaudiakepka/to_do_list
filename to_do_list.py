@@ -28,27 +28,35 @@ def load(_list):
 
 def add():
     error = StringVar()
+    task_type = IntVar(value=0)
+    expanded = BooleanVar(value=False)
+
+    def toggle():
+        if not expanded.get():
+            arrow.config(text="▼ date and frequency")
+            frequency_label.grid(row=2, column=0, sticky=W)
+            date_label.grid(row=3, column=0, sticky=W)
+            frequency_entry.grid(row=2, column=1)
+            date_entry.grid(row=3, column=1)
+            task_type.set(1)
+            expanded.set(True)
+        else:
+            arrow.config(text="▶ date and frequency")
+            frequency_label.grid_remove()
+            date_label.grid_remove()
+            frequency_entry.grid_remove()
+            date_entry.grid_remove()
+            task_type.set(0)
+            expanded.set(False)
 
     def submit():
+        print(task_type.get())
         date = ""
         frequency = 0
         name = name_entry.get()
         save_state(tasks)
         write = True
-        try:
-            date = datetime.strptime(date_entry.get(), "%Y.%m.%d").date()
-        except ValueError:
-            error.set("wrong date. Use format Y.M.D")
-            write = False
 
-        try:
-            frequency = int(frequency_entry.get())
-            if frequency <= 0:
-                write = False
-                error.set("frequency must be more than 0")
-        except (TypeError, ValueError):
-            write = False
-            error.set("frequency must be a number")
         if name is None:
             write = False
             error.set("name cannot be empty")
@@ -64,16 +72,35 @@ def add():
                     write = False
                     error.set("task already exist")
 
+        if task_type.get() == 1:
+            try:
+                date = datetime.strptime(date_entry.get(), "%Y.%m.%d").date()
+            except ValueError:
+                error.set("wrong date. Use format Y.M.D")
+                write = False
+            try:
+                frequency = int(frequency_entry.get())
+                if frequency <= 0:
+                    write = False
+                    error.set("frequency must be more than 0")
+            except (TypeError, ValueError):
+                write = False
+                error.set("frequency must be a number")
+
         if not os.path.exists('dane/tasks.txt'):
             open('dane/tasks.txt', 'a').close()
         with open('dane/tasks.txt', 'a', encoding='utf-8') as file:
             if write:
-                task = Task_frequency(1,name,False,0,date,frequency)
+                if task_type.get() == 1:
+                    task = Task_frequency(task_type.get(),name,False,0,date,frequency)
+                elif task_type.get() == 0:
+                    task = Task(task_type.get(),name,False,0)
                 file.write(task.write())
         load(tasks)
 
     add_window = Toplevel(root)
     name_label = Label(add_window, text="name:")
+    arrow = Label(add_window, text='▶ date and frequency')
     frequency_label = Label(add_window, text="frequency:")
     date_label = Label(add_window, text='starting date:')
     name_entry = Entry(add_window)
@@ -82,14 +109,22 @@ def add():
     submit_button = Button(add_window, text="Submit", command=submit)
     error_message = Label(add_window, textvariable=error)
 
+
     name_label.grid(row=0, column=0, sticky=W)
-    frequency_label.grid(row=1, column=0, sticky=W)
-    date_label.grid(row=2, column=0, sticky=W)
+    arrow.grid(row=1, column=0, sticky=W)
+    frequency_label.grid(row=2, column=0, sticky=W)
+    date_label.grid(row=3, column=0, sticky=W)
     name_entry.grid(row=0, column=1)
-    frequency_entry.grid(row=1, column=1)
-    date_entry.grid(row=2, column=1)
-    submit_button.grid(row=0, column=2, rowspan=3)
-    error_message.grid(row=3, column=0, columnspan=3)
+    frequency_entry.grid(row=2, column=1)
+    date_entry.grid(row=3, column=1)
+    submit_button.grid(row=0, column=2, rowspan=4)
+    error_message.grid(row=4, column=0, columnspan=3)
+
+    arrow.bind("<Button-1>", lambda e: toggle())
+    frequency_label.grid_remove()
+    date_label.grid_remove()
+    frequency_entry.grid_remove()
+    date_entry.grid_remove()
 
 def delete():
     text = StringVar()
