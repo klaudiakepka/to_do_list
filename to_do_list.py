@@ -28,29 +28,31 @@ def load(_list):
 
 def add():
     error = StringVar()
-    task_type = IntVar(value=0)
+    task_type = 0
     expanded = BooleanVar(value=False)
 
-    def toggle():
+    def toggle_frequency():
+        global task_type
         if not expanded.get():
-            arrow.config(text="▼ date and frequency")
+            arrow_frequency.config(text="▼ frequency")
             frequency_label.grid(row=2, column=0, sticky=W)
-            date_label.grid(row=3, column=0, sticky=W)
             frequency_entry.grid(row=2, column=1)
+            date_label.grid(row=3, column=0, sticky=W)
             date_entry.grid(row=3, column=1)
-            task_type.set(1)
+            task_type = 1
             expanded.set(True)
         else:
-            arrow.config(text="▶ date and frequency")
+            arrow_frequency.config(text="▶ frequency")
             frequency_label.grid_remove()
-            date_label.grid_remove()
             frequency_entry.grid_remove()
+            date_label.grid_remove()
             date_entry.grid_remove()
-            task_type.set(0)
+            task_type = 0
             expanded.set(False)
 
     def submit():
-        print(task_type.get())
+        global task_type
+        print(task_type)
         date = ""
         frequency = 0
         name = name_entry.get()
@@ -72,7 +74,7 @@ def add():
                     write = False
                     error.set("task already exist")
 
-        if task_type.get() == 1:
+        if task_type == 1:
             try:
                 date = datetime.strptime(date_entry.get(), "%Y.%m.%d").date()
             except ValueError:
@@ -91,16 +93,16 @@ def add():
             open('dane/tasks.txt', 'a').close()
         with open('dane/tasks.txt', 'a', encoding='utf-8') as file:
             if write:
-                if task_type.get() == 1:
-                    task = Task_frequency(task_type.get(),name,False,0,date,frequency)
-                elif task_type.get() == 0:
-                    task = Task(task_type.get(),name,False,0)
+                if task_type == 1:
+                    task = Task_frequency(task_type,name,False,0,date,frequency)
+                elif task_type == 0:
+                    task = Task(task_type,name,False,0)
                 file.write(task.write())
         load(tasks)
 
     add_window = Toplevel(root)
     name_label = Label(add_window, text="name:")
-    arrow = Label(add_window, text='▶ date and frequency')
+    arrow_frequency = Label(add_window, text='▶ frequency')
     frequency_label = Label(add_window, text="frequency:")
     date_label = Label(add_window, text='starting date:')
     name_entry = Entry(add_window)
@@ -111,7 +113,7 @@ def add():
 
 
     name_label.grid(row=0, column=0, sticky=W)
-    arrow.grid(row=1, column=0, sticky=W)
+    arrow_frequency.grid(row=1, column=0, sticky=W)
     frequency_label.grid(row=2, column=0, sticky=W)
     date_label.grid(row=3, column=0, sticky=W)
     name_entry.grid(row=0, column=1)
@@ -120,7 +122,7 @@ def add():
     submit_button.grid(row=0, column=2, rowspan=4)
     error_message.grid(row=4, column=0, columnspan=3)
 
-    arrow.bind("<Button-1>", lambda e: toggle())
+    arrow_frequency.bind("<Button-1>", lambda e: toggle_frequency())
     frequency_label.grid_remove()
     date_label.grid_remove()
     frequency_entry.grid_remove()
