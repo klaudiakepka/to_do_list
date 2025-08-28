@@ -1,9 +1,9 @@
 import os.path
 from datetime import datetime, timedelta
 from tkinter import *
+
 from Task import Task
 from Task_frequency import Task_frequency
-
 
 def load(_list):
     _list.clear()
@@ -17,14 +17,13 @@ def load(_list):
             elif parts[0] == '1':
                 _list.append(Task_frequency(parts[0], parts[1], parts[2], parts[3], datetime.strptime(parts[4], "%Y-%m-%d").date(), parts[5]))
 
-    checkboxes = []
+    checkboxes = {}
     for widget in container.winfo_children():
         widget.destroy()
     for task in _list:
         if task.show():
-            checkboxes.append(Checkbutton(container, text=task.get_name(), variable=task.get_state()))
-    for i in range(len(checkboxes)):
-        checkboxes[i].pack(anchor='w')
+            checkboxes[task.get_name()] = (Checkbutton(container, text=task.get_name(), variable=task.get_state()))
+            checkboxes[task.get_name()].pack(anchor='w')
 
 def add():
     error = StringVar()
