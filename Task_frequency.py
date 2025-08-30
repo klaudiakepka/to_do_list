@@ -4,8 +4,10 @@ from Task import Task
 class Task_frequency(Task):
     def __init__(self,type, name, state, streak, date, frequency):
         super().__init__(type, name, state, streak)
-        self.date = date
         self.frequency = frequency
+        if date == "":
+            date = datetime.today().date()
+        self.date = date
 
     def show(self):
         today = datetime.today().date()

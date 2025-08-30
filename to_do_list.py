@@ -51,7 +51,6 @@ def add():
 
     def submit():
         global task_type
-        print(task_type)
         date = ""
         frequency = 0
         name = name_entry.get()
