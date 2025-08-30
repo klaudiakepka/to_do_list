@@ -26,20 +26,20 @@ def load(_list):
             checkboxes[task.get_name()].pack(anchor='w')
 
 def add():
-    error = StringVar()
     task_type = 0
-    expanded = BooleanVar(value=False)
+    expanded_frequency = False
 
     def toggle_frequency():
-        global task_type
-        if not expanded.get():
+        nonlocal task_type
+        nonlocal expanded_frequency
+        if not expanded_frequency:
             arrow_frequency.config(text="▼ frequency")
             frequency_label.grid(row=2, column=0, sticky=W)
             frequency_entry.grid(row=2, column=1)
             date_label.grid(row=3, column=0, sticky=W)
             date_entry.grid(row=3, column=1)
             task_type = 1
-            expanded.set(True)
+            expanded_frequency = True
         else:
             arrow_frequency.config(text="▶ frequency")
             frequency_label.grid_remove()
@@ -47,10 +47,9 @@ def add():
             date_label.grid_remove()
             date_entry.grid_remove()
             task_type = 0
-            expanded.set(False)
+            expanded_frequency = False
 
     def submit():
-        global task_type
         date = ""
         frequency = 0
         name = name_entry.get()
@@ -59,33 +58,33 @@ def add():
 
         if name is None:
             write = False
-            error.set("name cannot be empty")
+            error_message.config(text = "name cannot be empty")
         elif len(name) <= 0:
             write = False
-            error.set("name cannot be empty")
+            error_message.config(text = "name cannot be empty")
         elif "\\n" in name:
             write = False
-            error.set("name cannot contain escape character")
+            error_message.config(text = "name cannot contain escape character")
         else:
             for item in tasks:
                 if item.get_name() == name:
                     write = False
-                    error.set("task already exist")
+                    error_message.config(text = "task already exist")
 
         if task_type == 1:
             try:
                 date = datetime.strptime(date_entry.get(), "%Y.%m.%d").date()
             except ValueError:
-                error.set("wrong date. Use format Y.M.D")
+                error_message.config(text = "wrong date. Use format Y.M.D")
                 write = False
             try:
                 frequency = int(frequency_entry.get())
                 if frequency <= 0:
                     write = False
-                    error.set("frequency must be more than 0")
+                    error_message.config(text = "frequency must be more than 0")
             except (TypeError, ValueError):
                 write = False
-                error.set("frequency must be a number")
+                error_message.config(text = "frequency must be a number")
 
         if not os.path.exists('dane/tasks.txt'):
             open('dane/tasks.txt', 'a').close()
@@ -96,6 +95,7 @@ def add():
                 elif task_type == 0:
                     task = Task(task_type,name,False,0)
                 file.write(task.write())
+                error_message.config(text="")
         load(tasks)
 
     add_window = Toplevel(root)
@@ -107,7 +107,7 @@ def add():
     frequency_entry = Entry(add_window)
     date_entry = Entry(add_window)
     submit_button = Button(add_window, text="Submit", command=submit)
-    error_message = Label(add_window, textvariable=error)
+    error_message = Label(add_window, text="")
 
 
     name_label.grid(row=0, column=0, sticky=W)
