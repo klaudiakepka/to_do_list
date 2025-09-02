@@ -1,8 +1,8 @@
 from Task import Task
 
 class Task_list(Task):
-    def __init__(self,type, name, state, streak, main_task, tasks=None):
-        super().__init__(type, name, state, streak)
+    def __init__(self,type, name, state, streak, date, main_task, tasks=None):
+        super().__init__(type, name, state, streak, date)
         self.main_task = main_task
         self.tasks = tasks if tasks is not None else []
 

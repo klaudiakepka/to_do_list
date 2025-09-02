@@ -13,7 +13,7 @@ def load(_list):
         for text_line in file.readlines():
             parts = text_line.split(',')
             if parts[0] == '0':
-                _list.append(Task(parts[0], parts[1], parts[2], parts[3]))
+                _list.append(Task(parts[0], parts[1], parts[2], parts[3], datetime.strptime(parts[4], "%Y-%m-%d").date()))
             elif parts[0] == '1':
                 _list.append(Task_frequency(parts[0], parts[1], parts[2], parts[3], datetime.strptime(parts[4], "%Y-%m-%d").date(), parts[5]))
 
@@ -26,28 +26,36 @@ def load(_list):
             checkboxes[task.get_name()].pack(anchor='w')
 
 def add():
-    task_type = 0
     expanded_frequency = False
+    expanded_date = False
 
     def toggle_frequency():
-        nonlocal task_type
         nonlocal expanded_frequency
         if not expanded_frequency:
             arrow_frequency.config(text="▼ frequency")
             frequency_label.grid(row=2, column=0, sticky=W)
             frequency_entry.grid(row=2, column=1)
-            date_label.grid(row=3, column=0, sticky=W)
-            date_entry.grid(row=3, column=1)
-            task_type = 1
+            arrow_date.grid(row=frequency_entry.grid_info()["row"]+1)
             expanded_frequency = True
         else:
             arrow_frequency.config(text="▶ frequency")
             frequency_label.grid_remove()
             frequency_entry.grid_remove()
+            expanded_frequency = False
+
+    def toggle_date():
+        nonlocal expanded_date
+        if not expanded_date:
+            arrow_date.config(text="▼ date")
+            row = arrow_date.grid_info()['row']
+            date_label.grid(row=row+1, column=0, sticky=W)
+            date_entry.grid(row=row+1, column=1)
+            expanded_date = True
+        else:
+            arrow_date.config(text="▶ date")
             date_label.grid_remove()
             date_entry.grid_remove()
-            task_type = 0
-            expanded_frequency = False
+            expanded_date = False
 
     def submit():
         date = ""
@@ -71,12 +79,14 @@ def add():
                     write = False
                     error_message.config(text = "task already exist")
 
-        if task_type == 1:
+        if expanded_date:
             try:
                 date = datetime.strptime(date_entry.get(), "%Y.%m.%d").date()
             except ValueError:
                 error_message.config(text = "wrong date. Use format Y.M.D")
                 write = False
+
+        if expanded_frequency:
             try:
                 frequency = int(frequency_entry.get())
                 if frequency <= 0:
@@ -90,10 +100,10 @@ def add():
             open('dane/tasks.txt', 'a').close()
         with open('dane/tasks.txt', 'a', encoding='utf-8') as file:
             if write:
-                if task_type == 1:
-                    task = Task_frequency(task_type,name,False,0,date,frequency)
-                elif task_type == 0:
-                    task = Task(task_type,name,False,0)
+                if expanded_frequency:
+                    task = Task_frequency(1,name,False,0,date,frequency)
+                else:
+                    task = Task(0,name,False,0,date)
                 file.write(task.write())
                 error_message.config(text="")
         load(tasks)
@@ -102,6 +112,7 @@ def add():
     name_label = Label(add_window, text="name:")
     arrow_frequency = Label(add_window, text='▶ frequency')
     frequency_label = Label(add_window, text="frequency:")
+    arrow_date = Label(add_window, text="▶ date")
     date_label = Label(add_window, text='starting date:')
     name_entry = Entry(add_window)
     frequency_entry = Entry(add_window)
@@ -113,7 +124,8 @@ def add():
     name_label.grid(row=0, column=0, sticky=W)
     arrow_frequency.grid(row=1, column=0, sticky=W)
     frequency_label.grid(row=2, column=0, sticky=W)
-    date_label.grid(row=3, column=0, sticky=W)
+    arrow_date.grid(row=3, column=0, sticky=W)
+    date_label.grid(row=5, column=0, sticky=W)
     name_entry.grid(row=0, column=1)
     frequency_entry.grid(row=2, column=1)
     date_entry.grid(row=3, column=1)
@@ -121,6 +133,7 @@ def add():
     error_message.grid(row=4, column=0, columnspan=3)
 
     arrow_frequency.bind("<Button-1>", lambda e: toggle_frequency())
+    arrow_date.bind("<Button-1>", lambda e: toggle_date())
     frequency_label.grid_remove()
     date_label.grid_remove()
     frequency_entry.grid_remove()
@@ -162,16 +175,13 @@ def save_state(_list):
         open('dane/tasks.txt', 'a').close()
     with open('dane/tasks.txt', 'w', encoding='utf-8') as file:
         for item in _list:
-            if item.get_type() == '1':
-                if item.show() and not item.get_state_get() :
-                    date = item.get_date()
-                elif item.show():
-                    date = today
-                else:
-                    date = item.get_date()
-                file.write(item.write(date))
+            if item.show() and not item.get_state_get() :
+                date = item.get_date()
+            elif item.show():
+                date = today
             else:
-                file.write(f"{item.write()}\n")
+                date = item.get_date()
+            file.write(item.write(date))
 
 def open_new_day(_list):
     today = datetime.today().date()
