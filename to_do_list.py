@@ -50,6 +50,7 @@ def add():
             row = arrow_date.grid_info()['row']
             date_label.grid(row=row+1, column=0, sticky=W)
             date_entry.grid(row=row+1, column=1)
+            error_message.grid(row=row+2)
             expanded_date = True
         else:
             arrow_date.config(text="▶ date")
