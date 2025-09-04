@@ -130,7 +130,7 @@ def add():
     name_entry.grid(row=0, column=1)
     frequency_entry.grid(row=2, column=1)
     date_entry.grid(row=3, column=1)
-    submit_button.grid(row=0, column=2, rowspan=4)
+    submit_button.grid(row=0, column=2, rowspan=arrow_date.grid_info()["row"]+2)
     error_message.grid(row=4, column=0, columnspan=3)
 
     arrow_frequency.bind("<Button-1>", lambda e: toggle_frequency())
