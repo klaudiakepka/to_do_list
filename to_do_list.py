@@ -1,7 +1,6 @@
 import os.path
 from datetime import datetime, timedelta
 from tkinter import *
-
 from Task import Task
 from Task_frequency import Task_frequency
 
@@ -141,8 +140,6 @@ def add():
     date_entry.grid_remove()
 
 def delete():
-    text = StringVar()
-
     def create():
         name_list.delete(0, END)
         for i in range(len(tasks)):
@@ -150,21 +147,18 @@ def delete():
 
     def submit():
         name = name_list.get(name_list.curselection())
-        change = False
         for item in tasks:
             if name == item.get_name():
                 tasks.remove(item)
-                change = True
-                text.set("Task removed")
-        if change:
-            save_state(tasks)
-            create()
+                message.config(text=f"{name} removed")
+                save_state(tasks)
+                create()
         load(tasks)
 
     delete_window = Toplevel(root)
     name_list = Listbox(delete_window)
     delete_button = Button(delete_window, text="delete", command=submit)
-    message = Label(delete_window, textvariable=text)
+    message = Label(delete_window, text="")
     create()
     name_list.grid(column=0, row=0)
     delete_button.grid(column=1, row=0)

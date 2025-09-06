@@ -13,6 +13,8 @@ class Task:
         self.date = date
 
     def show(self):
+        if self.date > datetime.today().date():
+            return False
         return True
 
     def write(self,date=None):
@@ -37,9 +39,6 @@ class Task:
 
     def get_state_get(self):
         return self.state.get()
-
-    def get_type(self):
-        return self.type
 
     def get_date(self):
         return self.date
