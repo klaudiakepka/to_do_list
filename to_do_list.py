@@ -1,5 +1,6 @@
 import os.path
 from datetime import datetime, timedelta
+from itertools import count
 from tkinter import *
 from Task import Task
 from Task_frequency import Task_frequency
@@ -27,6 +28,8 @@ def load(_list):
 def add():
     expanded_frequency = False
     expanded_date = False
+    weekdays = {"Mo":0, "Tu":0, "We":0, "Th":0, "Fr":0, "Sa":0, "Su":0}
+    weekdays_buttons = {}
 
     def toggle_frequency():
         nonlocal expanded_frequency
@@ -56,6 +59,14 @@ def add():
             date_label.grid_remove()
             date_entry.grid_remove()
             expanded_date = False
+
+    def day_clicked(day):
+        weekdays[day] = int(not weekdays[day])
+        if weekdays[day]:
+            weekdays_buttons[day].config(bg='light blue')
+        else:
+            weekdays_buttons[day].config(bg='SystemButtonFace')
+
 
     def submit():
         date = ""
@@ -117,9 +128,12 @@ def add():
     name_entry = Entry(add_window)
     frequency_entry = Entry(add_window)
     date_entry = Entry(add_window)
+    day_frame = Frame(add_window)
+    for i, day in enumerate(weekdays.keys()):
+        weekdays_buttons[day] =  day_button = Button(day_frame, text=day, command=lambda d=day: day_clicked(d))
+        day_button.pack(side=LEFT)
     submit_button = Button(add_window, text="Submit", command=submit)
     error_message = Label(add_window, text="")
-
 
     name_label.grid(row=0, column=0, sticky=W)
     arrow_frequency.grid(row=1, column=0, sticky=W)
@@ -129,8 +143,9 @@ def add():
     name_entry.grid(row=0, column=1)
     frequency_entry.grid(row=2, column=1)
     date_entry.grid(row=3, column=1)
-    submit_button.grid(row=0, column=2, rowspan=arrow_date.grid_info()["row"]+2)
-    error_message.grid(row=4, column=0, columnspan=3)
+    day_frame.grid(row=4, column=0, columnspan=2)
+    submit_button.grid(row=0, column=2, rowspan=day_frame.grid_info()["row"]+2)
+    error_message.grid(row=5, column=0, columnspan=3)
 
     arrow_frequency.bind("<Button-1>", lambda e: toggle_frequency())
     arrow_date.bind("<Button-1>", lambda e: toggle_date())
