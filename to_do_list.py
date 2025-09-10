@@ -1,9 +1,11 @@
 import os.path
 from datetime import datetime, timedelta
-from itertools import count
 from tkinter import *
 from Task import Task
+from Task_day import Task_day
 from Task_frequency import Task_frequency
+
+weekdays_names = ["Mo", "Tu", "We", "Th", "Fr", "Sa", "Su"]
 
 def load(_list):
     _list.clear()
@@ -16,6 +18,8 @@ def load(_list):
                 _list.append(Task(parts[0], parts[1], parts[2], parts[3], datetime.strptime(parts[4], "%Y-%m-%d").date()))
             elif parts[0] == '1':
                 _list.append(Task_frequency(parts[0], parts[1], parts[2], parts[3], datetime.strptime(parts[4], "%Y-%m-%d").date(), parts[5]))
+            elif parts[0] == '2':
+                _list.append(Task_day(parts[0], parts[1], parts[2], parts[3], datetime.strptime(parts[4], "%Y-%m-%d").date(),parts[5]))
 
     checkboxes = {}
     for widget in container.winfo_children():
@@ -28,7 +32,7 @@ def load(_list):
 def add():
     expanded_frequency = False
     expanded_date = False
-    weekdays = {"Mo":0, "Tu":0, "We":0, "Th":0, "Fr":0, "Sa":0, "Su":0}
+    weekdays_clicked = [0]*7
     weekdays_buttons = {}
 
     def toggle_frequency():
@@ -60,13 +64,12 @@ def add():
             date_entry.grid_remove()
             expanded_date = False
 
-    def day_clicked(day):
-        weekdays[day] = int(not weekdays[day])
-        if weekdays[day]:
-            weekdays_buttons[day].config(bg='light blue')
+    def day_clicked(weekday_num):
+        weekdays_clicked[weekday_num] = int(not weekdays_clicked[weekday_num])
+        if weekdays_clicked[weekday_num]:
+            weekdays_buttons[weekdays_names[weekday_num]].config(bg='light blue')
         else:
-            weekdays_buttons[day].config(bg='SystemButtonFace')
-
+            weekdays_buttons[weekdays_names[weekday_num]].config(bg='SystemButtonFace')
 
     def submit():
         date = ""
@@ -74,6 +77,11 @@ def add():
         name = name_entry.get()
         save_state(tasks)
         write = True
+        days = ''
+
+        for i,click in enumerate(weekdays_clicked):
+            if click == 1:
+                days += str(i)
 
         if name is None:
             write = False
@@ -111,7 +119,9 @@ def add():
             open('dane/tasks.txt', 'a').close()
         with open('dane/tasks.txt', 'a', encoding='utf-8') as file:
             if write:
-                if expanded_frequency:
+                if len(days) != 0:
+                    task = Task_day(2,name,False,0,date,days)
+                elif expanded_frequency:
                     task = Task_frequency(1,name,False,0,date,frequency)
                 else:
                     task = Task(0,name,False,0,date)
@@ -129,8 +139,8 @@ def add():
     frequency_entry = Entry(add_window)
     date_entry = Entry(add_window)
     day_frame = Frame(add_window)
-    for i, day in enumerate(weekdays.keys()):
-        weekdays_buttons[day] =  day_button = Button(day_frame, text=day, command=lambda d=day: day_clicked(d))
+    for i, day in enumerate(weekdays_names):
+        weekdays_buttons[day] =  day_button = Button(day_frame, text=day, command=lambda num=i: day_clicked(num))
         day_button.pack(side=LEFT)
     submit_button = Button(add_window, text="Submit", command=submit)
     error_message = Label(add_window, text="")
