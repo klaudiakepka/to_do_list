@@ -1,9 +1,10 @@
 from Task import Task
 
 class Task_list(Task):
-    def __init__(self,type, name, state, streak, date, tasks=None):
+    def __init__(self,type, name, state, streak, date, sub_task_num):
         super().__init__(type, name, state, streak, date)
-        self.tasks = tasks if tasks is not None else []
+        self.tasks = []
+        self.sub_task_num = sub_task_num
 
     def mark_main_task(self):
         mark = True
@@ -15,3 +16,6 @@ class Task_list(Task):
 
     def get_subtasks(self):
         return self.tasks
+
+    def add_subtask(self, subtask):
+        self.tasks.append(subtask)

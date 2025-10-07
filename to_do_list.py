@@ -4,22 +4,29 @@ from tkinter import *
 from Task import Task
 from Task_day import Task_day
 from Task_frequency import Task_frequency
+from Task_list import Task_list
 
 weekdays_names = ["Mo", "Tu", "We", "Th", "Fr", "Sa", "Su"]
 
 def load(_list):
+    def list_add():
+        task_type = parts[0]
+        if task_type == '0':
+            _list.append(Task(task_type, parts[1], parts[2], parts[3], datetime.strptime(parts[4], "%Y-%m-%d").date()))
+        elif task_type == '1':
+            _list.append(Task_frequency(task_type, parts[1], parts[2], parts[3], datetime.strptime(parts[4], "%Y-%m-%d").date(), parts[5]))
+        elif task_type == '2':
+            _list.append(Task_day(task_type, parts[1], parts[2], parts[3], datetime.strptime(parts[4], "%Y-%m-%d").date(), parts[5]))
+        elif task_type == '3':
+            _list.append(Task_list(task_type, parts[1], parts[2], parts[3], datetime.strptime(parts[4], "%Y-%m-%d").date(), parts[5]))
+
     _list.clear()
     if not os.path.exists('dane/tasks.txt'):
         open('dane/tasks.txt', 'a').close()
     with open('dane/tasks.txt', encoding='utf-8') as file:
         for text_line in file.readlines():
             parts = text_line.split(',')
-            if parts[0] == '0':
-                _list.append(Task(parts[0], parts[1], parts[2], parts[3], datetime.strptime(parts[4], "%Y-%m-%d").date()))
-            elif parts[0] == '1':
-                _list.append(Task_frequency(parts[0], parts[1], parts[2], parts[3], datetime.strptime(parts[4], "%Y-%m-%d").date(), parts[5]))
-            elif parts[0] == '2':
-                _list.append(Task_day(parts[0], parts[1], parts[2], parts[3], datetime.strptime(parts[4], "%Y-%m-%d").date(),parts[5]))
+            list_add()
 
     checkboxes = {}
     for widget in container.winfo_children():
@@ -41,7 +48,6 @@ def add():
             arrow_frequency.config(text="▼ frequency")
             frequency_label.grid(row=2, column=0, sticky=W)
             frequency_entry.grid(row=2, column=1)
-            arrow_date.grid(row=frequency_entry.grid_info()["row"]+1)
             expanded_frequency = True
         else:
             arrow_frequency.config(text="▶ frequency")
@@ -144,25 +150,16 @@ def add():
         day_button.pack(side=LEFT)
     submit_button = Button(add_window, text="Submit", command=submit)
     error_message = Label(add_window, text="")
-
     name_label.grid(row=0, column=0, sticky=W)
     arrow_frequency.grid(row=1, column=0, sticky=W)
-    frequency_label.grid(row=2, column=0, sticky=W)
-    arrow_date.grid(row=3, column=0, sticky=W)
-    date_label.grid(row=5, column=0, sticky=W)
+    arrow_date.grid(row=arrow_frequency.grid_info()["row"]+2, column=0, sticky=W)
     name_entry.grid(row=0, column=1)
-    frequency_entry.grid(row=2, column=1)
-    date_entry.grid(row=3, column=1)
-    day_frame.grid(row=4, column=0, columnspan=2)
+    day_frame.grid(row=arrow_date.grid_info()["row"]+2, column=0, columnspan=2)
     submit_button.grid(row=0, column=2, rowspan=day_frame.grid_info()["row"]+2)
     error_message.grid(row=5, column=0, columnspan=3)
 
     arrow_frequency.bind("<Button-1>", lambda e: toggle_frequency())
     arrow_date.bind("<Button-1>", lambda e: toggle_date())
-    frequency_label.grid_remove()
-    date_label.grid_remove()
-    frequency_entry.grid_remove()
-    date_entry.grid_remove()
 
 def delete():
     def create():
